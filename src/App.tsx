@@ -143,7 +143,7 @@ export default function App() {
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm">
           <div className="flex items-center gap-3.5">
             <div className="bg-indigo-600 p-2.5 rounded-xl text-white shadow-md">
-              <img src="public/img/coppa.png" alt="Trophy Icon" className="w-15 h-20" />
+              <img src="/img/coppa.png" alt="Trophy Icon" className="w-15 h-20" />
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
