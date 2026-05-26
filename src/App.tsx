@@ -275,7 +275,7 @@ export default function App() {
 
         {/* HUMBLE PAGE FOOTER */}
         <footer className="text-center py-6 border-t border-slate-200 mt-10 text-slate-400 font-mono text-[10px]">
-          WORLD CUP SURVIVOR STRATEGIST • SVILUPPATO CON MATEMATICA DI ELO LOGISTIC SCALE • © 2026
+          WORLD CUP SURVIVOR STRATEGIST • SVILUPPATO CON MATEMATICA DI ELO LOGISTIC SCALE • RAFFSACC.DEV © 2026
         </footer>
       </div>
     </div>
