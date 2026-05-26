@@ -1,0 +1,6 @@
+{
+  "name": "Mondiale Survivor Simulator",
+  "description": "Un'applicazione web per gestire un gioco Survivor basato sulle partite del Mondiale con calcolo algoritmi di sopravvivenza ed ottimizzazione.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

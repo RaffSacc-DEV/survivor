@@ -1,0 +1,156 @@
+import { Team, TeamRanking, Match } from "../types";
+
+export const DEFAULT_TEAMS: Team[] = [
+  { id: "ARG", name: "Argentina", flag: "🇦🇷" },
+  { id: "BRA", name: "Brasile", flag: "🇧🇷" },
+  { id: "FRA", name: "Francia", flag: "🇫🇷" },
+  { id: "ENG", name: "Inghilterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  { id: "ESP", name: "Spagna", flag: "🇪🇸" },
+  { id: "POR", name: "Portogallo", flag: "🇵🇹" },
+  { id: "GER", name: "Germania", flag: "🇩🇪" },
+  { id: "NED", name: "Olanda", flag: "🇳🇱" },
+  { id: "BEL", name: "Belgio", flag: "🇧🇪" },
+  { id: "CRO", name: "Croazia", flag: "🇭🇷" },
+  { id: "MAR", name: "Marocco", flag: "🇲🇦" },
+  { id: "URU", name: "Uruguay", flag: "🇺🇾" },
+  { id: "JPN", name: "Giappone", flag: "🇯🇵" },
+  { id: "USA", name: "Stati Uniti", flag: "🇺🇸" },
+  { id: "SEN", name: "Senegal", flag: "🇸🇳" },
+  { id: "MEX", name: "Messico", flag: "🇲🇽" },
+  { id: "COL", name: "Colombia", flag: "🇨🇴" },
+  { id: "SUI", name: "Svizzera", flag: "🇨🇭" },
+  { id: "SWE", name: "Svezia", flag: "🇸🇪" },
+  { id: "NOR", name: "Norvegia", flag: "🇳🇴" },
+  { id: "AUT", name: "Austria", flag: "🇦🇹" },
+  { id: "TUR", name: "Turchia", flag: "🇹🇷" },
+  { id: "CAN", name: "Canada", flag: "🇨🇦" },
+  { id: "AUS", name: "Australia", flag: "🇦🇺" },
+  { id: "KOR", name: "Rep. di Corea", flag: "🇰🇷" },
+  { id: "KSA", name: "Arabia Saudita", flag: "🇸🇦" },
+  { id: "RSA", name: "Sudafrica", flag: "🇿🇦" },
+  { id: "CZE", name: "Rep. Ceca", flag: "🇨🇿" },
+  { id: "BIH", name: "Bosnia Erzegovina", flag: "🇧🇦" },
+  { id: "PRY", name: "Paraguay", flag: "🇵🇾" },
+  { id: "QAT", name: "Qatar", flag: "🇶🇦" },
+  { id: "HTI", name: "Haiti", flag: "🇭🇹" },
+  { id: "SCO", name: "Scozia", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  { id: "CUW", name: "Curaçao", flag: "🇨🇼" },
+  { id: "CIV", name: "Costa d'Avorio", flag: "🇨🇮" },
+  { id: "TUN", name: "Tunisia", flag: "🇹🇳" },
+  { id: "CPV", name: "Capo Verde", flag: "🇨🇻" },
+  { id: "EGY", name: "Egitto", flag: "🇪🇬" },
+  { id: "IRN", name: "Iran", flag: "🇮🇷" },
+  { id: "NZL", name: "Nuova Zelanda", flag: "🇳🇿" },
+  { id: "IRQ", name: "Iraq", flag: "🇮🇶" },
+  { id: "ALG", name: "Algeria", flag: "🇩🇿" },
+  { id: "JOR", name: "Giordania", flag: "🇯🇴" },
+  { id: "COD", name: "Rep. Dem. del Congo", flag: "🇨🇩" },
+  { id: "UZB", name: "Uzbekistan", flag: "🇺🇿" },
+  { id: "GHA", name: "Ghana", flag: "🇬🇭" },
+  { id: "PAN", name: "Panama", flag: "🇵🇦" },
+  { id: "ECU", name: "Ecuador", flag: "🇪🇨" }
+];
+
+const ranking2Ids = [
+  "FRA", "ESP", "BRA", "ENG", "ARG", "POR", "GER", "NED", 
+  "NOR", "BEL", "COL", "JPN", "MAR", "USA", "URU", "MEX", 
+  "SUI", "CRO", "SEN", "ECU", "TUR", "SWE", "AUT", "CAN", 
+  "PRY", "CIV", "SCO", "CZE", "BIH", "KOR", "GHA", "EGY", 
+  "AUS", "ALG", "TUN", "COD", "RSA", "KSA", "IRQ", "IRN", 
+  "UZB", "NZL", "PAN", "CPV", "QAT", "HTI", "JOR", "CUW"
+];
+
+export const DEFAULT_RANKINGS: TeamRanking[] = [
+  {
+    id: "bookmakers",
+    name: "Quote Bookmakers (Vittoria)",
+    teamIds: [...ranking2Ids],
+    isActive: true
+  }
+];
+
+export const DEFAULT_FIXTURES: Match[] = [
+  // ROUND 1: Gironi
+  { id: "r1_m1", round: "1° Round", homeTeamId: "MEX", awayTeamId: "RSA", stage: "gironi" },
+  { id: "r1_m2", round: "1° Round", homeTeamId: "KOR", awayTeamId: "CZE", stage: "gironi" },
+  { id: "r1_m3", round: "1° Round", homeTeamId: "CAN", awayTeamId: "BIH", stage: "gironi" },
+  { id: "r1_m4", round: "1° Round", homeTeamId: "USA", awayTeamId: "PRY", stage: "gironi" },
+  { id: "r1_m5", round: "1° Round", homeTeamId: "QAT", awayTeamId: "SUI", stage: "gironi" },
+  { id: "r1_m6", round: "1° Round", homeTeamId: "BRA", awayTeamId: "MAR", stage: "gironi" },
+  { id: "r1_m7", round: "1° Round", homeTeamId: "HTI", awayTeamId: "SCO", stage: "gironi" },
+  { id: "r1_m8", round: "1° Round", homeTeamId: "AUS", awayTeamId: "TUR", stage: "gironi" },
+  { id: "r1_m9", round: "1° Round", homeTeamId: "GER", awayTeamId: "CUW", stage: "gironi" },
+  { id: "r1_m10", round: "1° Round", homeTeamId: "NED", awayTeamId: "JPN", stage: "gironi" },
+  { id: "r1_m11", round: "1° Round", homeTeamId: "CIV", awayTeamId: "ECU", stage: "gironi" },
+  { id: "r1_m12", round: "1° Round", homeTeamId: "SWE", awayTeamId: "TUN", stage: "gironi" },
+
+  // ROUND 2: Gironi
+  { id: "r2_m1", round: "2° Round", homeTeamId: "ESP", awayTeamId: "CPV", stage: "gironi" },
+  { id: "r2_m2", round: "2° Round", homeTeamId: "BEL", awayTeamId: "EGY", stage: "gironi" },
+  { id: "r2_m3", round: "2° Round", homeTeamId: "KSA", awayTeamId: "URU", stage: "gironi" },
+  { id: "r2_m4", round: "2° Round", homeTeamId: "IRN", awayTeamId: "NZL", stage: "gironi" },
+  { id: "r2_m5", round: "2° Round", homeTeamId: "FRA", awayTeamId: "SEN", stage: "gironi" },
+  { id: "r2_m6", round: "2° Round", homeTeamId: "IRQ", awayTeamId: "NOR", stage: "gironi" },
+  { id: "r2_m7", round: "2° Round", homeTeamId: "ARG", awayTeamId: "ALG", stage: "gironi" },
+  { id: "r2_m8", round: "2° Round", homeTeamId: "AUT", awayTeamId: "JOR", stage: "gironi" },
+  { id: "r2_m9", round: "2° Round", homeTeamId: "POR", awayTeamId: "COD", stage: "gironi" },
+  { id: "r2_m10", round: "2° Round", homeTeamId: "ENG", awayTeamId: "CRO", stage: "gironi" },
+  { id: "r2_m11", round: "2° Round", homeTeamId: "GHA", awayTeamId: "PAN", stage: "gironi" },
+  { id: "r2_m12", round: "2° Round", homeTeamId: "UZB", awayTeamId: "COL", stage: "gironi" },
+
+  // ROUND 3: Gironi
+  { id: "r3_m1", round: "3° Round", homeTeamId: "CZE", awayTeamId: "RSA", stage: "gironi" },
+  { id: "r3_m2", round: "3° Round", homeTeamId: "SUI", awayTeamId: "BIH", stage: "gironi" },
+  { id: "r3_m3", round: "3° Round", homeTeamId: "CAN", awayTeamId: "QAT", stage: "gironi" },
+  { id: "r3_m4", round: "3° Round", homeTeamId: "MEX", awayTeamId: "KOR", stage: "gironi" },
+  { id: "r3_m5", round: "3° Round", homeTeamId: "USA", awayTeamId: "AUS", stage: "gironi" },
+  { id: "r3_m6", round: "3° Round", homeTeamId: "SCO", awayTeamId: "MAR", stage: "gironi" },
+  { id: "r3_m7", round: "3° Round", homeTeamId: "BRA", awayTeamId: "HTI", stage: "gironi" },
+  { id: "r3_m8", round: "3° Round", homeTeamId: "TUR", awayTeamId: "PRY", stage: "gironi" },
+  { id: "r3_m9", round: "3° Round", homeTeamId: "NED", awayTeamId: "SWE", stage: "gironi" },
+  { id: "r3_m10", round: "3° Round", homeTeamId: "GER", awayTeamId: "CIV", stage: "gironi" },
+  { id: "r3_m11", round: "3° Round", homeTeamId: "ECU", awayTeamId: "CUW", stage: "gironi" },
+  { id: "r3_m12", round: "3° Round", homeTeamId: "TUN", awayTeamId: "JPN", stage: "gironi" },
+
+  // ROUND 4: Gironi
+  { id: "r4_m1", round: "4° Round", homeTeamId: "ESP", awayTeamId: "KSA", stage: "gironi" },
+  { id: "r4_m2", round: "4° Round", homeTeamId: "BEL", awayTeamId: "IRN", stage: "gironi" },
+  { id: "r4_m3", round: "4° Round", homeTeamId: "URU", awayTeamId: "CPV", stage: "gironi" },
+  { id: "r4_m4", round: "4° Round", homeTeamId: "NZL", awayTeamId: "EGY", stage: "gironi" },
+  { id: "r4_m5", round: "4° Round", homeTeamId: "ARG", awayTeamId: "AUT", stage: "gironi" },
+  { id: "r4_m6", round: "4° Round", homeTeamId: "FRA", awayTeamId: "IRQ", stage: "gironi" },
+  { id: "r4_m7", round: "4° Round", homeTeamId: "NOR", awayTeamId: "SEN", stage: "gironi" },
+  { id: "r4_m8", round: "4° Round", homeTeamId: "JOR", awayTeamId: "ALG", stage: "gironi" },
+  { id: "r4_m9", round: "4° Round", homeTeamId: "POR", awayTeamId: "UZB", stage: "gironi" },
+  { id: "r4_m10", round: "4° Round", homeTeamId: "ENG", awayTeamId: "GHA", stage: "gironi" },
+  { id: "r4_m11", round: "4° Round", homeTeamId: "PAN", awayTeamId: "CRO", stage: "gironi" },
+  { id: "r4_m12", round: "4° Round", homeTeamId: "COL", awayTeamId: "BRA", stage: "gironi" },
+
+  // ROUND 5: Gironi
+  { id: "r5_m1", round: "5° Round", homeTeamId: "SUI", awayTeamId: "CAN", stage: "gironi" },
+  { id: "r5_m2", round: "5° Round", homeTeamId: "BIH", awayTeamId: "QAT", stage: "gironi" },
+  { id: "r5_m3", round: "5° Round", homeTeamId: "SCO", awayTeamId: "BRA", stage: "gironi" },
+  { id: "r5_m4", round: "5° Round", homeTeamId: "MAR", awayTeamId: "HTI", stage: "gironi" },
+  { id: "r5_m5", round: "5° Round", homeTeamId: "CZE", awayTeamId: "MEX", stage: "gironi" },
+  { id: "r5_m6", round: "5° Round", homeTeamId: "RSA", awayTeamId: "KOR", stage: "gironi" },
+  { id: "r5_m7", round: "5° Round", homeTeamId: "ECU", awayTeamId: "GER", stage: "gironi" },
+  { id: "r5_m8", round: "5° Round", homeTeamId: "CUW", awayTeamId: "CIV", stage: "gironi" },
+  { id: "r5_m9", round: "5° Round", homeTeamId: "TUN", awayTeamId: "NED", stage: "gironi" },
+  { id: "r5_m10", round: "5° Round", homeTeamId: "JPN", awayTeamId: "SWE", stage: "gironi" },
+  { id: "r5_m11", round: "5° Round", homeTeamId: "TUR", awayTeamId: "USA", stage: "gironi" },
+  { id: "r5_m12", round: "5° Round", homeTeamId: "PRY", awayTeamId: "AUS", stage: "gironi" },
+
+  // ROUND 6: Gironi
+  { id: "r6_m1", round: "6° Round", homeTeamId: "MEX", awayTeamId: "FRA", stage: "gironi" },
+  { id: "r6_m2", round: "6° Round", homeTeamId: "SEN", awayTeamId: "IRQ", stage: "gironi" },
+  { id: "r6_m3", round: "6° Round", homeTeamId: "URU", awayTeamId: "ESP", stage: "gironi" },
+  { id: "r6_m4", round: "6° Round", homeTeamId: "CPV", awayTeamId: "KSA", stage: "gironi" },
+  { id: "r6_m5", round: "6° Round", homeTeamId: "NZL", awayTeamId: "BEL", stage: "gironi" },
+  { id: "r6_m6", round: "6° Round", homeTeamId: "EGY", awayTeamId: "IRN", stage: "gironi" },
+  { id: "r6_m7", round: "6° Round", homeTeamId: "PAN", awayTeamId: "ENG", stage: "gironi" },
+  { id: "r6_m8", round: "6° Round", homeTeamId: "CRO", awayTeamId: "GHA", stage: "gironi" },
+  { id: "r6_m9", round: "6° Round", homeTeamId: "COL", awayTeamId: "POR", stage: "gironi" },
+  { id: "r6_m10", round: "6° Round", homeTeamId: "GER", awayTeamId: "UZB", stage: "gironi" },
+  { id: "r6_m11", round: "6° Round", homeTeamId: "JOR", awayTeamId: "ARG", stage: "gironi" },
+  { id: "r6_m12", round: "6° Round", homeTeamId: "ALG", awayTeamId: "AUT", stage: "gironi" }
+];
