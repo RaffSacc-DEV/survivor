@@ -4,9 +4,21 @@ import FixturesManager from "./components/FixturesManager";
 import AverageRankingCalculator from "./components/AverageRankingCalculator";
 import PathGenerator from "./components/PathGenerator";
 import SurvivorRulesEngine from "./components/SurvivorRulesEngine";
-import { DEFAULT_TEAMS, DEFAULT_RANKINGS, DEFAULT_FIXTURES } from "./utils/defaultData";
+import {
+  DEFAULT_TEAMS,
+  DEFAULT_RANKINGS,
+  DEFAULT_FIXTURES,
+} from "./utils/defaultData";
 import { Team, TeamRanking, Match, PathLocks } from "./types";
-import { Trophy, RefreshCw, Layers, Calendar, Star, TrendingUp, Info } from "lucide-react";
+import {
+  RefreshCw,
+  Layers,
+  Calendar,
+  Star,
+  TrendingUp,
+  Info,
+} from "lucide-react";
+import { supabase } from "./lib/supabase";
 
 const STORAGE_KEYS = {
   TEAMS: "worldcup_survivor_teams",
@@ -16,89 +28,151 @@ const STORAGE_KEYS = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"paths" | "rankings" | "calculated" | "fixtures" | "rules">("paths");
+  const [activeTab, setActiveTab] = useState<
+    "paths" | "rankings" | "calculated" | "fixtures" | "rules"
+  >("paths");
 
-  // State populated from LocalStorage or defaultData
   const [teams, setTeams] = useState<Team[]>([]);
   const [rankings, setRankings] = useState<TeamRanking[]>([]);
   const [fixtures, setFixtures] = useState<Match[]>([]);
   const [locks, setLocks] = useState<PathLocks>({});
-
-  // Loading phase
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    // Attempt local storage hydrate
-    try {
-      const storedTeams = localStorage.getItem(STORAGE_KEYS.TEAMS);
-      const storedRankings = localStorage.getItem(STORAGE_KEYS.RANKINGS);
-      const storedFixtures = localStorage.getItem(STORAGE_KEYS.FIXTURES);
-      const storedLocks = localStorage.getItem(STORAGE_KEYS.LOCKS);
+  const formatSupabaseRankings = (data: any[]): TeamRanking[] => {
+  const formatted: TeamRanking[] = data.map((r) => ({
+    id: r.id,
+    name: r.name,
+    teamIds: r.team_ids,
+    isActive: r.is_active ?? true,
+  }));
 
-      let parsedTeams = storedTeams ? JSON.parse(storedTeams) : null;
-      let parsedRankings = storedRankings ? JSON.parse(storedRankings) : null;
-      let parsedFixtures = storedFixtures ? JSON.parse(storedFixtures) : null;
+  const cleanedRankings = formatted.filter(
+    (r) => r.id !== "fifa" && r.id !== "expert_opinion"
+  );
 
-      // Automatically upgrade if structure is obsolete (fewer teams or different length)
-      if (parsedTeams && parsedTeams.length !== DEFAULT_TEAMS.length) {
-        parsedTeams = null;
-        parsedRankings = null;
-        parsedFixtures = null;
-        localStorage.removeItem(STORAGE_KEYS.TEAMS);
-        localStorage.removeItem(STORAGE_KEYS.RANKINGS);
-        localStorage.removeItem(STORAGE_KEYS.FIXTURES);
-        localStorage.removeItem(STORAGE_KEYS.LOCKS);
-      }
-
-      if (parsedTeams) setTeams(parsedTeams);
-      else setTeams(DEFAULT_TEAMS);
-
-      if (parsedRankings) {
-        let cleanedRankings = parsedRankings.filter((r: any) => r.id !== "fifa" && r.id !== "expert_opinion");
-        // Always override default "bookmakers" with the hardcoded files to stay fully fresh
-        cleanedRankings = cleanedRankings.map((r: any) => {
-          const defaultRank = DEFAULT_RANKINGS.find((dr) => dr.id === r.id);
-          return defaultRank ? { ...defaultRank, isActive: r.isActive } : r;
-        });
-
-        // Ensure default rankings "bookmakers" is present
-        DEFAULT_RANKINGS.forEach((defaultRank) => {
-          if (!cleanedRankings.some((r: any) => r.id === defaultRank.id)) {
-            cleanedRankings.push(defaultRank);
-          }
-        });
-
-        // Ensure that selectedRankingId is valid by checking if active rankings are consistent
-        setRankings(cleanedRankings);
-      } else {
-        setRankings(DEFAULT_RANKINGS);
-      }
-
-      if (parsedFixtures) setFixtures(parsedFixtures);
-      else setFixtures(DEFAULT_FIXTURES);
-
-      if (storedLocks) setLocks(JSON.parse(storedLocks));
-      else setLocks({});
-    } catch (e) {
-      console.error("Local storage hydrate failed, recovering defaults", e);
-      setTeams(DEFAULT_TEAMS);
-      setRankings(DEFAULT_RANKINGS);
-      setFixtures(DEFAULT_FIXTURES);
-      setLocks({});
+  DEFAULT_RANKINGS.forEach((defaultRank) => {
+    if (!cleanedRankings.some((r) => r.id === defaultRank.id)) {
+      cleanedRankings.push({
+        ...defaultRank,
+        isActive: defaultRank.isActive ?? true,
+      });
     }
-    setLoaded(true);
+  });
+
+  return cleanedRankings;
+};
+
+  const loadRankingsFromSupabase = async () => {
+    const { data, error } = await supabase
+      .from("rankings")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Errore caricamento classifiche Supabase:", error);
+      return null;
+    }
+
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    return formatSupabaseRankings(data);
+  };
+
+  const handleUpdateRankings = async (newRankings: TeamRanking[]) => {
+    setRankings(newRankings);
+    localStorage.setItem(STORAGE_KEYS.RANKINGS, JSON.stringify(newRankings));
+
+    const rows = newRankings.map((r) => ({
+      id: r.id,
+      name: r.name,
+      team_ids: r.teamIds,
+      is_active: r.isActive ?? true,
+    }));
+
+    const { error: upsertError } = await supabase
+      .from("rankings")
+      .upsert(rows);
+
+    if (upsertError) {
+      console.error("Errore salvataggio classifiche:", upsertError);
+      return;
+    }
+
+    const idsToKeep = newRankings.map((r) => r.id);
+
+    const { error: deleteError } = await supabase
+      .from("rankings")
+      .delete()
+      .not("id", "in", `(${idsToKeep.map((id) => `"${id}"`).join(",")})`);
+
+    if (deleteError) {
+      console.error("Errore eliminazione classifiche rimosse:", deleteError);
+    }
+  };
+
+  useEffect(() => {
+    const hydrate = async () => {
+      try {
+        const storedTeams = localStorage.getItem(STORAGE_KEYS.TEAMS);
+        const storedFixtures = localStorage.getItem(STORAGE_KEYS.FIXTURES);
+        const storedLocks = localStorage.getItem(STORAGE_KEYS.LOCKS);
+        const storedRankings = localStorage.getItem(STORAGE_KEYS.RANKINGS);
+
+        let parsedTeams = storedTeams ? JSON.parse(storedTeams) : null;
+        let parsedFixtures = storedFixtures ? JSON.parse(storedFixtures) : null;
+        const parsedRankings = storedRankings
+          ? JSON.parse(storedRankings)
+          : null;
+
+        if (parsedTeams && parsedTeams.length !== DEFAULT_TEAMS.length) {
+          parsedTeams = null;
+          parsedFixtures = null;
+
+          localStorage.removeItem(STORAGE_KEYS.TEAMS);
+          localStorage.removeItem(STORAGE_KEYS.RANKINGS);
+          localStorage.removeItem(STORAGE_KEYS.FIXTURES);
+          localStorage.removeItem(STORAGE_KEYS.LOCKS);
+        }
+
+        setTeams(parsedTeams || DEFAULT_TEAMS);
+        setFixtures(parsedFixtures || DEFAULT_FIXTURES);
+        setLocks(storedLocks ? JSON.parse(storedLocks) : {});
+
+        const onlineRankings = await loadRankingsFromSupabase();
+
+        if (onlineRankings) {
+          setRankings(onlineRankings);
+          localStorage.setItem(
+            STORAGE_KEYS.RANKINGS,
+            JSON.stringify(onlineRankings)
+          );
+        } else if (parsedRankings) {
+          setRankings(parsedRankings);
+          await handleUpdateRankings(parsedRankings);
+        } else {
+          setRankings(DEFAULT_RANKINGS);
+          await handleUpdateRankings(DEFAULT_RANKINGS);
+        }
+      } catch (e) {
+        console.error("Errore caricamento dati:", e);
+        setTeams(DEFAULT_TEAMS);
+        setRankings(DEFAULT_RANKINGS);
+        setFixtures(DEFAULT_FIXTURES);
+        setLocks({});
+      }
+
+      setLoaded(true);
+    };
+
+    hydrate();
   }, []);
 
-  // Sync back state modifications to LocalStorage
   useEffect(() => {
     if (!loaded) return;
     localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
   }, [teams, loaded]);
-
-  useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(STORAGE_KEYS.RANKINGS, JSON.stringify(rankings));
-  }, [rankings, loaded]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -110,17 +184,16 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LOCKS, JSON.stringify(locks));
   }, [locks, loaded]);
 
-  // Command to restore full pristine mock datasets
-  const handleResetToDefaults = () => {
+  const handleResetToDefaults = async () => {
     if (
       window.confirm(
         "Sei sicuro di voler ripristinare i dati di default? Questo cancellerà tutti i tuoi inserimenti personalizzati."
       )
     ) {
       setTeams(DEFAULT_TEAMS);
-      setRankings(DEFAULT_RANKINGS);
       setFixtures(DEFAULT_FIXTURES);
       setLocks({});
+      await handleUpdateRankings(DEFAULT_RANKINGS);
     }
   };
 
@@ -128,23 +201,28 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-900 flex-col gap-3 font-sans">
         <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-mono text-slate-500">Caricamento Simulatore...</span>
+        <span className="text-xs font-mono text-slate-500">
+          Caricamento Simulatore...
+        </span>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Visual background lines accent */}
       <div className="absolute top-0 left-0 right-0 h-[380px] bg-gradient-to-b from-indigo-100/35 to-transparent pointer-events-none -z-10" />
 
       <div className="w-full max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6">
-        {/* APP SHELL HEADER */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm">
           <div className="flex items-center gap-3.5">
             <div className="bg-indigo-600 p-2.5 rounded-xl text-white shadow-md">
-              <img src="/img/coppa.png" alt="Trophy Icon" className="w-15 h-20" />
+              <img
+                src="/img/coppa.png"
+                alt="Trophy Icon"
+                className="w-15 h-20"
+              />
             </div>
+
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
                 Mondiale Survivor Simulator
@@ -159,6 +237,7 @@ export default function App() {
             <span className="text-[10px] text-slate-600 font-mono bg-slate-100 px-2 py-1 rounded border border-slate-200 shrink-0 uppercase">
               Live UTC: 2026-05-26
             </span>
+
             <button
               onClick={handleResetToDefaults}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-indigo-600 font-bold border border-slate-200 rounded-xl transition text-[10px] cursor-pointer"
@@ -170,7 +249,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* TAB NAVIGATION STRIP */}
         <nav className="flex items-center gap-1 overflow-x-auto bg-white border border-slate-200 p-1.5 rounded-xl scrollbar-none shadow-sm">
           <button
             onClick={() => setActiveTab("paths")}
@@ -233,7 +311,6 @@ export default function App() {
           </button>
         </nav>
 
-        {/* CORE MAIN DASHBOARD SCREEN */}
         <main className="min-h-[400px]">
           {activeTab === "paths" && (
             <PathGenerator
@@ -249,15 +326,12 @@ export default function App() {
             <RankingsManager
               teams={teams}
               rankings={rankings}
-              onUpdateRankings={setRankings}
+              onUpdateRankings={handleUpdateRankings}
             />
           )}
 
           {activeTab === "calculated" && (
-            <AverageRankingCalculator
-              teams={teams}
-              rankings={rankings}
-            />
+            <AverageRankingCalculator teams={teams} rankings={rankings} />
           )}
 
           {activeTab === "fixtures" && (
@@ -268,14 +342,12 @@ export default function App() {
             />
           )}
 
-          {activeTab === "rules" && (
-            <SurvivorRulesEngine />
-          )}
+          {activeTab === "rules" && <SurvivorRulesEngine />}
         </main>
 
-        {/* HUMBLE PAGE FOOTER */}
         <footer className="text-center py-6 border-t border-slate-200 mt-10 text-slate-400 font-mono text-[10px]">
-          WORLD CUP SURVIVOR STRATEGIST • SVILUPPATO CON MATEMATICA DI ELO LOGISTIC SCALE • RAFFSACC.DEV © 2026
+          WORLD CUP SURVIVOR STRATEGIST • SVILUPPATO CON MATEMATICA DI ELO
+          LOGISTIC SCALE • RAFFSACC.DEV © 2026
         </footer>
       </div>
     </div>

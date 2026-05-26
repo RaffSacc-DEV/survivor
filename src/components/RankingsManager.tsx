@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 interface RankingsManagerProps {
   teams: Team[];
   rankings: TeamRanking[];
-  onUpdateRankings: (newRankings: TeamRanking[]) => void;
+  onUpdateRankings: (newRankings: TeamRanking[]) => void | Promise<void>;
 }
 
 export default function RankingsManager({
@@ -19,8 +19,22 @@ export default function RankingsManager({
   const [newRankingName, setNewRankingName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   const activeRanking = rankings.find((r) => r.id === selectedRankingId) || rankings[0];
+
+  const handleUploadToDatabase = async () => {
+  try {
+    setIsUploading(true);
+    await onUpdateRankings(rankings);
+    alert("Classifiche caricate sul database con successo!");
+  } catch (error) {
+    console.error(error);
+    alert("Errore durante il caricamento sul database.");
+  } finally {
+    setIsUploading(false);
+  }
+};
 
   React.useEffect(() => {
     if (activeRanking && selectedRankingId !== activeRanking.id) {
@@ -165,12 +179,21 @@ export default function RankingsManager({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="rankings-manager">
       {/* Colonna di sinistra: Lista Classifiche */}
       <div className="lg:col-span-4 bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col gap-4">
-        <div className="flex justify-between items-center sm:pb-3 border-b border-slate-100">
-          <h3 className="font-sans font-semibold text-lg text-slate-800 flex items-center gap-2">
-            <Star className="text-indigo-600 w-5 h-5 fill-indigo-100" />
-            Classifiche Inserite
-          </h3>
-        </div>
+        <div className="flex justify-between items-center sm:pb-3 border-b border-slate-100 gap-3">
+  <h3 className="font-sans font-semibold text-lg text-slate-800 flex items-center gap-2">
+    <Star className="text-indigo-600 w-5 h-5 fill-indigo-100" />
+    Classifiche Inserite
+  </h3>
+
+  <button
+    type="button"
+    onClick={handleUploadToDatabase}
+    disabled={isUploading}
+    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-lg text-[11px] font-bold transition cursor-pointer"
+  >
+    {isUploading ? "Caricamento..." : "Carica DB"}
+  </button>
+</div>
 
         {/* Elenco Classifiche */}
         <div className="flex flex-col gap-2 overflow-y-auto max-h-[300px] lg:max-h-[500px] pr-1">
